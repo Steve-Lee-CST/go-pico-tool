@@ -25,7 +25,7 @@
         - timestamp: formatted as readable local time, format: 20060102150405
         - microSecond: no special operation
         - randSegment: no special operation
-        - Returns: `[]string{ timestamp, microSecond, randSegment }`
+        - Returns: `[]string{ formatted_timestamp, microSecond, randSegment }`
 
 ## Main Tool: IDGenerator
 
@@ -33,7 +33,7 @@ The main structure is as follows
 ```go
 type IDGenerator struct {}
 func NewIDGenerator(config Config) *IDGenerator {}
-func (tool *IDGenerator) Generate() string {}
+func (tool *IDGenerator) Generate() string {} // Generate an ID, concurrency safety depends on Modifier
 ```
 
 ## Helper Functions: None

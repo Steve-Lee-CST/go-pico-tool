@@ -25,7 +25,7 @@
         - timestamp: 转为可读的本地时间, 格式: 20060102150405
         - microSecond: 无特殊操作
         - randSegment: 无特殊操作
-        - 返回: `[]string{ timestamp, microSecond, randSegment }`
+        - 返回: `[]string{ formatted_timestamp, microSecond, randSegment }`
 
 ## 工具本体: IDGenerator
 
@@ -33,7 +33,7 @@
 ```go
 type IDGenerator struct {}
 func NewIDGenerator(config Config) *IDGenerator {}
-func (tool *IDGenerator) Generate() string {}
+func (tool *IDGenerator) Generate() string {} // 生成一个ID, 并发安全依赖于 Modifier 
 ```
 
 ## 辅助函数: 无
