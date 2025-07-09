@@ -16,6 +16,4 @@ For most components, the following structure is used:
 
 ## Components List
 
-- ID Generator
-
-[id generator usage](./pico_tool/id_generator/_readme.en.md)
+- ID Generator: [id generator usage](./pico_tool/id_generator/_readme.en.md)

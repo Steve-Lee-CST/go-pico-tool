@@ -14,6 +14,4 @@
 
 ## 工具列表
 
-### ID Generator
-
-[id generator 使用说明](./pico_tool/id_generator/_readme.cn.md)
+- ID Generator: [id generator 使用说明](./pico_tool/id_generator/_readme.cn.md)
