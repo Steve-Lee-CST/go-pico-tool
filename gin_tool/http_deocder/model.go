@@ -9,14 +9,15 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// HttpRequest some most common fields of HTTP request
 type HttpRequest struct {
-	Method   string `json:"method"`
-	Protocol string `json:"protocol"`
-	Host     string `json:"host"`
-	URL      string `json:"url"`
-	Path     string `json:"path"`
-	FullPath string `json:"full_path"`
-	IP       string `json:"ip"`
+	Method   string   `json:"method"`
+	Protocol string   `json:"protocol"`
+	Host     string   `json:"host"`
+	URL      *url.URL `json:"url"`
+	Path     string   `json:"path"`
+	FullPath string   `json:"full_path"`
+	IP       string   `json:"ip"`
 
 	Header    http.Header    `json:"headers"`
 	Cookies   []*http.Cookie `json:"cookies"`
@@ -41,6 +42,7 @@ type HttpRequest struct {
 	ReceivedTime time.Time `json:"received_time"`
 }
 
+// HttpResponse some most common fields of HTTP response
 type HttpResponse struct {
 	// response info
 	Status      int    `json:"status"`
