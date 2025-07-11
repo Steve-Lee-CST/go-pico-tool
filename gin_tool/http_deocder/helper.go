@@ -60,7 +60,6 @@ func (h *helper) DecodeRequest(c *gin.Context, config Config) *HttpRequest {
 		Protocol: c.Request.Proto,
 		Host:     c.Request.Host,
 		URL:      c.Request.URL,
-		Path:     c.Request.URL.Path,
 		FullPath: c.FullPath(),
 		IP:       c.ClientIP(),
 

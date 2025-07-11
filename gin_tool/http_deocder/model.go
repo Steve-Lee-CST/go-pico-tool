@@ -15,7 +15,6 @@ type HttpRequest struct {
 	Protocol string   `json:"protocol"`
 	Host     string   `json:"host"`
 	URL      *url.URL `json:"url"`
-	Path     string   `json:"path"`
 	FullPath string   `json:"full_path"`
 	IP       string   `json:"ip"`
 

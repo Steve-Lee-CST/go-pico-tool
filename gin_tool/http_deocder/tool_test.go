@@ -52,7 +52,6 @@ func TestHttpDecoder_CustomConfig(t *testing.T) {
 		req := Helper.GetHttpRequest(c, cfg)
 		assert.NotNil(t, req, "HTTP request should be decoded")
 		assert.Equal(t, "GET", req.Method)
-		assert.Equal(t, "/decode", req.Path)
 		c.JSON(http.StatusOK, gin.H{"message": "success"})
 	})
 
@@ -189,7 +188,6 @@ func TestHttpDecoder_HelperFunctions(t *testing.T) {
 		// 测试设置HTTP请求
 		testReq := &HttpRequest{
 			Method: "GET",
-			Path:   "/test",
 			IP:     "127.0.0.1",
 		}
 		Helper.SetHttpRequest(c, cfg, testReq)
@@ -198,7 +196,6 @@ func TestHttpDecoder_HelperFunctions(t *testing.T) {
 		retrievedReq := Helper.GetHttpRequest(c, cfg)
 		assert.NotNil(t, retrievedReq)
 		assert.Equal(t, "GET", retrievedReq.Method)
-		assert.Equal(t, "/test", retrievedReq.Path)
 		assert.Equal(t, "127.0.0.1", retrievedReq.IP)
 
 		// 测试设置HTTP响应
@@ -232,7 +229,6 @@ func TestHttpDecoder_DecodeRequest(t *testing.T) {
 		req := Helper.DecodeRequest(c, DefaultConfig())
 		assert.NotNil(t, req)
 		assert.Equal(t, "POST", req.Method)
-		assert.Equal(t, "/decode-test", req.Path)
 		assert.NotZero(t, req.ReceivedTime)
 		c.JSON(http.StatusOK, gin.H{"message": "success"})
 	})
