@@ -74,7 +74,11 @@ func TestRequestIDTool_ReuseRequestIDFromHeader(t *testing.T) {
 			requestID = tool.GenerateRequestID()
 		}
 		Helper.SetRequestIDToResponse(c, tool.config, requestID)
-		c.JSON(http.StatusOK, common.SuccessResponse(&requestID))
+		c.JSON(http.StatusOK, common.CommonResponse[string]{
+			Code: 0,
+			Msg:  "",
+			Data: &requestID,
+		})
 	})
 
 	w := httptest.NewRecorder()

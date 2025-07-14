@@ -43,6 +43,10 @@ func (tool *RequestIDTool) Handler() gin.HandlerFunc {
 		requestID := tool.GenerateRequestID()
 		// return requestID from 2 ways: response & response-header
 		Helper.SetRequestIDToResponse(c, tool.config, requestID)
-		c.JSON(http.StatusOK, common.SuccessResponse(&requestID))
+		c.JSON(http.StatusOK, common.CommonResponse[string]{
+			Code: 0,
+			Msg:  "",
+			Data: &requestID,
+		})
 	}
 }
