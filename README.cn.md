@@ -14,6 +14,6 @@
 
 ## 工具列表
 
-- ID Generator: [id generator 使用说明](./pico_tool/id_generator/_readme.cn.md)
-- Request ID Tool: [request id tool 使用说明](./gin_tool/request_id/_readme.cn.md)
-- Http Decoder: [http decoder 使用说明](./gin_tool/http_deocder/_readme.cn.md)
+- ID Generator: [id generator 使用说明](./pkg/id_generator/_readme.cn.md)
+- Request ID Tool: [request id tool 使用说明](./pkg/gin_pkg/request_id/_readme.cn.md)
+- Http Decoder: [http decoder 使用说明](./pkg/gin_pkg/http_decoder/_readme.cn.md)

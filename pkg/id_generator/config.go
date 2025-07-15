@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/Steve-Lee-CST/go-pico-tool/pico_tool/utils"
+	"github.com/Steve-Lee-CST/go-pico-tool/tools"
 )
 
 type Modifier func(
@@ -17,7 +17,7 @@ type Config struct {
 }
 
 var defaultConfig = Config{
-	Separator: utils.ToPtr("-"),
+	Separator: tools.ToPtr("-"),
 	Modifier: func(timestamp int64, microSecond int64, randSegment string) []string {
 		return []string{
 			time.Unix(timestamp, 0).Format("20060102150405"),

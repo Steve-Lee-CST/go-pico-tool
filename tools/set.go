@@ -1,6 +1,11 @@
-package utils
+package tools
 
 import "sync"
+
+var (
+	_ ISet[any] = (*Set[any])(nil)
+	_ ISet[any] = (*ConcurrentSet[any])(nil)
+)
 
 type ISet[T comparable] interface {
 	Add(item T)
@@ -10,10 +15,10 @@ type ISet[T comparable] interface {
 	IsEmpty() bool
 	Clear()
 	Items() []T
-	Copy() *Set[T]
-	Union(other *Set[T]) *Set[T]
-	Intersection(other *Set[T]) *Set[T]
-	Difference(other *Set[T]) *Set[T]
+	Copy() ISet[T]
+	Union(other ISet[T]) ISet[T]
+	Intersection(other ISet[T]) ISet[T]
+	Difference(other ISet[T]) ISet[T]
 }
 
 type Set[T comparable] struct {
@@ -22,6 +27,14 @@ type Set[T comparable] struct {
 
 func NewSet[T comparable]() *Set[T] {
 	return &Set[T]{items: make(map[T]struct{})}
+}
+
+func NewSetFromISet[T comparable](src ISet[T]) *Set[T] {
+	newSet := NewSet[T]()
+	for _, item := range src.Items() {
+		newSet.Add(item)
+	}
+	return newSet
 }
 
 func (s *Set[T]) Add(item T) {
@@ -57,7 +70,7 @@ func (s *Set[T]) Items() []T {
 	return items
 }
 
-func (s *Set[T]) Copy() *Set[T] {
+func (s *Set[T]) Copy() ISet[T] {
 	newSet := NewSet[T]()
 	for item := range s.items {
 		newSet.Add(item)
@@ -65,18 +78,18 @@ func (s *Set[T]) Copy() *Set[T] {
 	return newSet
 }
 
-func (s *Set[T]) Union(other *Set[T]) *Set[T] {
+func (s *Set[T]) Union(other ISet[T]) ISet[T] {
 	unionSet := NewSet[T]()
 	for item := range s.items {
 		unionSet.Add(item)
 	}
-	for item := range other.items {
+	for _, item := range other.Items() {
 		unionSet.Add(item)
 	}
 	return unionSet
 }
 
-func (s *Set[T]) Intersection(other *Set[T]) *Set[T] {
+func (s *Set[T]) Intersection(other ISet[T]) ISet[T] {
 	intersectionSet := NewSet[T]()
 	for item := range s.items {
 		if other.Contains(item) {
@@ -86,7 +99,7 @@ func (s *Set[T]) Intersection(other *Set[T]) *Set[T] {
 	return intersectionSet
 }
 
-func (s *Set[T]) Difference(other *Set[T]) *Set[T] {
+func (s *Set[T]) Difference(other ISet[T]) ISet[T] {
 	differenceSet := NewSet[T]()
 	for item := range s.items {
 		if !other.Contains(item) {
@@ -97,13 +110,20 @@ func (s *Set[T]) Difference(other *Set[T]) *Set[T] {
 }
 
 type ConcurrentSet[T comparable] struct {
-	set  Set[T]
+	set  *Set[T]
 	lock sync.RWMutex
 }
 
 func NewConcurrentSet[T comparable]() *ConcurrentSet[T] {
 	return &ConcurrentSet[T]{
-		set:  *NewSet[T](),
+		set:  NewSet[T](),
+		lock: sync.RWMutex{},
+	}
+}
+
+func NewConcurrentSetFromISet[T comparable](other ISet[T]) *ConcurrentSet[T] {
+	return &ConcurrentSet[T]{
+		set:  NewSetFromISet(other),
 		lock: sync.RWMutex{},
 	}
 }
@@ -150,55 +170,39 @@ func (cs *ConcurrentSet[T]) Items() []T {
 	return cs.set.Items()
 }
 
-func (cs *ConcurrentSet[T]) Copy() *ConcurrentSet[T] {
+func (cs *ConcurrentSet[T]) Copy() ISet[T] {
 	cs.lock.RLock()
 	defer cs.lock.RUnlock()
-	return &ConcurrentSet[T]{set: *cs.set.Copy(), lock: sync.RWMutex{}}
+	// return concurrent set in ConcurrentSet.Copy
+	return NewConcurrentSetFromISet(cs.set.Copy())
 }
 
-func (cq *ConcurrentSet[T]) Union(other *ConcurrentSet[T]) *ConcurrentSet[T] {
-	unionSet := NewConcurrentSet[T]()
-	func() {
-		cq.lock.RLock()
-		defer cq.lock.RUnlock()
-		for item := range cq.set.items {
-			unionSet.Add(item)
-		}
-	}()
-	func() {
-		other.lock.RLock()
-		defer other.lock.RUnlock()
-		for item := range other.set.items {
-			unionSet.Add(item)
-		}
-	}()
-	return unionSet
-}
-
-func (cq *ConcurrentSet[T]) Intersection(other *ConcurrentSet[T]) *ConcurrentSet[T] {
-	intersectionSet := NewConcurrentSet[T]()
+func (cs *ConcurrentSet[T]) Union(other ISet[T]) ISet[T] {
+	// Create a copy of the other set to ensure thread safety
 	otherCopy := other.Copy()
 
-	cq.lock.RLock()
-	defer cq.lock.RUnlock()
-	for item := range cq.set.items {
-		if otherCopy.set.Contains(item) {
-			intersectionSet.Add(item)
-		}
-	}
-	return intersectionSet
+	cs.lock.RLock()
+	defer cs.lock.RUnlock()
+	// return concurrent set in ConcurrentSet.Union
+	return NewConcurrentSetFromISet(cs.set.Union(otherCopy))
 }
 
-func (cq *ConcurrentSet[T]) Difference(other *ConcurrentSet[T]) *ConcurrentSet[T] {
-	differenceSet := NewConcurrentSet[T]()
+func (cs *ConcurrentSet[T]) Intersection(other ISet[T]) ISet[T] {
+	// Create a copy of the other set to ensure thread safety
 	otherCopy := other.Copy()
 
-	cq.lock.RLock()
-	defer cq.lock.RUnlock()
-	for item := range cq.set.items {
-		if !otherCopy.set.Contains(item) {
-			differenceSet.Add(item)
-		}
-	}
-	return differenceSet
+	cs.lock.RLock()
+	defer cs.lock.RUnlock()
+	// return concurrent set in ConcurrentSet.Intersection
+	return NewConcurrentSetFromISet(cs.set.Intersection(otherCopy))
+}
+
+func (cs *ConcurrentSet[T]) Difference(other ISet[T]) ISet[T] {
+	// Create a copy of the other set to ensure thread safety
+	otherCopy := other.Copy()
+
+	cs.lock.RLock()
+	defer cs.lock.RUnlock()
+	// return concurrent set in ConcurrentSet.Difference
+	return NewConcurrentSetFromISet(cs.set.Difference(otherCopy))
 }

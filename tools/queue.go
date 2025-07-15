@@ -1,8 +1,13 @@
-package utils
+package tools
 
 import (
 	"container/list"
 	"sync"
+)
+
+var (
+	_ IQueue[any] = (*Queue[any])(nil)
+	_ IQueue[any] = (*ConcurrentQueue[any])(nil)
 )
 
 type IQueue[T any] interface {
@@ -10,12 +15,8 @@ type IQueue[T any] interface {
 	Dequeue() (T, bool)
 	IsEmpty() bool
 	Size() int
+	Clear()
 }
-
-var (
-	_ IQueue[int] = (*Queue[int])(nil)
-	_ IQueue[int] = (*ConcurrentQueue[int])(nil)
-)
 
 type Queue[T any] struct {
 	items *list.List
@@ -47,44 +48,48 @@ func (q *Queue[T]) Size() int {
 	return q.items.Len()
 }
 
+func (q *Queue[T]) Clear() {
+	q.items.Init()
+}
+
 type ConcurrentQueue[T any] struct {
-	items *list.List
-	lock  sync.RWMutex
+	q    *Queue[T]
+	lock sync.RWMutex
 }
 
 func NewConcurrentQueue[T any]() *ConcurrentQueue[T] {
 	return &ConcurrentQueue[T]{
-		items: list.New(),
-		lock:  sync.RWMutex{},
+		q:    NewQueue[T](),
+		lock: sync.RWMutex{},
 	}
 }
 
 func (cq *ConcurrentQueue[T]) Enqueue(item T) {
 	cq.lock.Lock()
 	defer cq.lock.Unlock()
-	cq.items.PushBack(item)
+	cq.q.Enqueue(item)
 }
 
 func (cq *ConcurrentQueue[T]) Dequeue() (T, bool) {
 	cq.lock.Lock()
 	defer cq.lock.Unlock()
-	if cq.items.Len() == 0 {
-		var zero T
-		return zero, false
-	}
-	front := cq.items.Front()
-	cq.items.Remove(front)
-	return front.Value.(T), true
+	return cq.q.Dequeue()
 }
 
 func (cq *ConcurrentQueue[T]) IsEmpty() bool {
 	cq.lock.RLock()
 	defer cq.lock.RUnlock()
-	return cq.items.Len() == 0
+	return cq.q.IsEmpty()
 }
 
 func (cq *ConcurrentQueue[T]) Size() int {
 	cq.lock.RLock()
 	defer cq.lock.RUnlock()
-	return cq.items.Len()
+	return cq.q.Size()
+}
+
+func (cq *ConcurrentQueue[T]) Clear() {
+	cq.lock.Lock()
+	defer cq.lock.Unlock()
+	cq.q.Clear()
 }

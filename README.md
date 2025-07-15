@@ -16,6 +16,6 @@ For most components, the following structure is used:
 
 ## Components List
 
-- ID Generator: [id generator usage](./pico_tool/id_generator/_readme.en.md)
-- Request ID Tool: [request id tool usage](./gin_tool/request_id/_readme.en.md)
-- Http Decoder: [http decoder usage](./gin_tool/http_deocder/_readme.en.md)
+- ID Generator: [id generator usage](./pkg/id_generator/_readme.en.md)
+- Request ID Tool: [request id tool usage](./pkg/gin_pkg/request_id/_readme.en.md)
+- Http Decoder: [http decoder usage](./pkg/gin_pkg/http_decoder/_readme.en.md)
