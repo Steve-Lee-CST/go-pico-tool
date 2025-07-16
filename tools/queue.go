@@ -6,90 +6,103 @@ import (
 )
 
 var (
-	_ IQueue[any] = (*Queue[any])(nil)
-	_ IQueue[any] = (*ConcurrentQueue[any])(nil)
+	_ Queue[any] = (*queue[any])(nil)
+	_ Queue[any] = (*concurrentQueue[any])(nil)
 )
 
-type IQueue[T any] interface {
+type Queue[T any] interface {
 	Enqueue(item T)
 	Dequeue() (T, bool)
+	Peek() (T, bool)
 	IsEmpty() bool
 	Size() int
 	Clear()
 }
 
-type Queue[T any] struct {
-	items *list.List
+type queue[T any] list.List
+
+func NewQueue[T any]() Queue[T] {
+	return &queue[T]{}
 }
 
-func NewQueue[T any]() *Queue[T] {
-	return &Queue[T]{items: list.New()}
+func (q *queue[T]) Enqueue(item T) {
+	(*list.List)(q).PushBack(item)
 }
 
-func (q *Queue[T]) Enqueue(item T) {
-	q.items.PushBack(item)
-}
-
-func (q *Queue[T]) Dequeue() (T, bool) {
-	if q.items.Len() == 0 {
+func (q *queue[T]) Dequeue() (T, bool) {
+	if (*list.List)(q).Len() == 0 {
 		var zero T
 		return zero, false
 	}
-	front := q.items.Front()
-	q.items.Remove(front)
+	elem := (*list.List)(q).Front()
+	(*list.List)(q).Remove(elem)
+	return elem.Value.(T), true
+}
+
+func (q *queue[T]) Peek() (T, bool) {
+	if (*list.List)(q).Len() == 0 {
+		var zero T
+		return zero, false
+	}
+	front := (*list.List)(q).Front()
 	return front.Value.(T), true
 }
 
-func (q *Queue[T]) IsEmpty() bool {
-	return q.items.Len() == 0
+func (q *queue[T]) IsEmpty() bool {
+	return (*list.List)(q).Len() == 0
 }
 
-func (q *Queue[T]) Size() int {
-	return q.items.Len()
+func (q *queue[T]) Size() int {
+	return (*list.List)(q).Len()
 }
 
-func (q *Queue[T]) Clear() {
-	q.items.Init()
+func (q *queue[T]) Clear() {
+	(*list.List)(q).Init()
 }
 
-type ConcurrentQueue[T any] struct {
-	q    *Queue[T]
-	lock sync.RWMutex
+type concurrentQueue[T any] struct {
+	queue[T]
+	rwLock sync.RWMutex
 }
 
-func NewConcurrentQueue[T any]() *ConcurrentQueue[T] {
-	return &ConcurrentQueue[T]{
-		q:    NewQueue[T](),
-		lock: sync.RWMutex{},
+func NewConcurrentQueue[T any]() Queue[T] {
+	return &concurrentQueue[T]{
+		queue: queue[T]{},
 	}
 }
 
-func (cq *ConcurrentQueue[T]) Enqueue(item T) {
-	cq.lock.Lock()
-	defer cq.lock.Unlock()
-	cq.q.Enqueue(item)
+func (cq *concurrentQueue[T]) Enqueue(item T) {
+	cq.rwLock.Lock()
+	defer cq.rwLock.Unlock()
+	cq.queue.Enqueue(item)
 }
 
-func (cq *ConcurrentQueue[T]) Dequeue() (T, bool) {
-	cq.lock.Lock()
-	defer cq.lock.Unlock()
-	return cq.q.Dequeue()
+func (cq *concurrentQueue[T]) Dequeue() (T, bool) {
+	cq.rwLock.Lock()
+	defer cq.rwLock.Unlock()
+	return cq.queue.Dequeue()
 }
 
-func (cq *ConcurrentQueue[T]) IsEmpty() bool {
-	cq.lock.RLock()
-	defer cq.lock.RUnlock()
-	return cq.q.IsEmpty()
+func (cq *concurrentQueue[T]) Peek() (T, bool) {
+	cq.rwLock.RLock()
+	defer cq.rwLock.RUnlock()
+	return cq.queue.Peek()
 }
 
-func (cq *ConcurrentQueue[T]) Size() int {
-	cq.lock.RLock()
-	defer cq.lock.RUnlock()
-	return cq.q.Size()
+func (cq *concurrentQueue[T]) IsEmpty() bool {
+	cq.rwLock.RLock()
+	defer cq.rwLock.RUnlock()
+	return cq.queue.IsEmpty()
 }
 
-func (cq *ConcurrentQueue[T]) Clear() {
-	cq.lock.Lock()
-	defer cq.lock.Unlock()
-	cq.q.Clear()
+func (cq *concurrentQueue[T]) Size() int {
+	cq.rwLock.RLock()
+	defer cq.rwLock.RUnlock()
+	return cq.queue.Size()
+}
+
+func (cq *concurrentQueue[T]) Clear() {
+	cq.rwLock.Lock()
+	defer cq.rwLock.Unlock()
+	cq.queue.Clear()
 }

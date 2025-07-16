@@ -3,8 +3,8 @@ package request_id
 import (
 	"net/http"
 
-	"github.com/Steve-Lee-CST/go-pico-tool/gin_tool/common"
-	"github.com/Steve-Lee-CST/go-pico-tool/pico_tool/id_generator"
+	"github.com/Steve-Lee-CST/go-pico-tool/pkg/gin_pkg/common"
+	"github.com/Steve-Lee-CST/go-pico-tool/pkg/id_generator"
 	"github.com/gin-gonic/gin"
 )
 

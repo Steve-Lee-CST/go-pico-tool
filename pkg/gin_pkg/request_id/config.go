@@ -1,6 +1,6 @@
 package request_id
 
-import "github.com/Steve-Lee-CST/go-pico-tool/pico_tool/id_generator"
+import "github.com/Steve-Lee-CST/go-pico-tool/pkg/id_generator"
 
 type Config struct {
 	HeaderKey         string
