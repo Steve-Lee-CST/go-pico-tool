@@ -96,7 +96,7 @@ func (t *TaskDagflow[CT]) Execute(ctx context.Context, timeout time.Duration) er
 					go task.Execute(subCtx, t.collection, resultChan)
 				}
 			}
-			if taskRecord.Equal(t.collectionMeta.TargetTypes) {
+			if taskRecord.Equal(resultRecord) {
 				return nil
 			}
 		case result := <-resultChan:
@@ -107,6 +107,7 @@ func (t *TaskDagflow[CT]) Execute(ctx context.Context, timeout time.Duration) er
 			if result.Err != nil {
 				return fmt.Errorf("task %s failed: %w", result.Meta.Name, result.Err)
 			}
+			unblockTypeChan <- result.Meta.OutputType
 		}
 	}
 }

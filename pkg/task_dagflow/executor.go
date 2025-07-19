@@ -70,6 +70,7 @@ func (te *taskExecutor[CT]) executeWithTimeout(
 				Meta: te.Meta,
 				Err:  fmt.Errorf("task %s failed: %w", te.Meta.Name, err),
 			}
+			return
 		}
 		resultChan <- &taskResult[CT]{
 			Meta: te.Meta,

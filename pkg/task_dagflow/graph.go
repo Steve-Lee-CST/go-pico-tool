@@ -85,7 +85,6 @@ func (g *graph[CT]) calReachStatus(
 	targets.Append(collectionMeta.TargetTypes.ToSlice()...)
 
 	reachableTypes = mapset.NewSet[reflect.Type]()
-	unReachableTypes = mapset.NewSet[reflect.Type]()
 	for _, task := range g.outputToNode {
 		task.Reachable = false
 	}
