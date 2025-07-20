@@ -18,45 +18,82 @@ type Queue[T any] interface {
 	Clear()
 }
 
-type queue[T any] []T
+type node[T any] struct {
+	data T
+	next *node[T]
+}
+
+type queue[T any] struct {
+	head *node[T]
+	tail *node[T]
+	size int
+}
 
 func NewQueue[T any]() Queue[T] {
-	q := make(queue[T], 0)
-	return &q
+	return &queue[T]{
+		head: nil,
+		tail: nil,
+		size: 0,
+	}
 }
 
 func (q *queue[T]) Enqueue(item T) {
-	*q = append(*q, item)
+	newNode := &node[T]{
+		data: item,
+		next: nil,
+	}
+
+	if q.tail == nil {
+		q.head = newNode
+		q.tail = newNode
+	} else {
+		q.tail.next = newNode
+		q.tail = newNode
+	}
+
+	q.size++
 }
 
 func (q *queue[T]) Dequeue() (T, bool) {
-	if len(*q) == 0 {
-		var zero T
+	var zero T
+
+	if q.head == nil {
 		return zero, false
 	}
-	elem := (*q)[0]
-	*q = (*q)[1:]
-	return elem, true
+
+	data := q.head.data
+	q.head = q.head.next
+
+	if q.head == nil {
+		q.tail = nil
+	}
+
+	q.size--
+	return data, true
 }
 
 func (q *queue[T]) Peek() (T, bool) {
-	if len(*q) == 0 {
-		var zero T
+	var zero T
+
+	if q.head == nil {
 		return zero, false
 	}
-	return (*q)[0], true
+
+	return q.head.data, true
 }
 
 func (q *queue[T]) IsEmpty() bool {
-	return len(*q) == 0
+	return q.head == nil
 }
 
 func (q *queue[T]) Size() int {
-	return len(*q)
+	return q.size
 }
 
 func (q *queue[T]) Clear() {
-	*q = (*q)[:0]
+	q.head = nil
+	q.tail = nil
+	q.size = 0
 }
 
 type concurrentQueue[T any] struct {

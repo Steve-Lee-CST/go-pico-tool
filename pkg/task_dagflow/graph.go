@@ -46,7 +46,7 @@ func newGraph[CT ICollection](metas []*taskMeta[CT]) *graph[CT] {
 	return g
 }
 
-// 并查集查找 outputType 的所有输入类型
+// getInputs finds all input types for the given output type using union-find algorithm
 func (g *graph[CT]) getInputs(outputType reflect.Type) mapset.Set[reflect.Type] {
 	node, exists := g.outputToNode[outputType]
 	if !exists {

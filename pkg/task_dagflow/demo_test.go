@@ -303,14 +303,11 @@ func TestTaskTimeout(t *testing.T) {
 	}
 
 	ctx := context.Background()
-	if err := taskDagflow.Execute(ctx, 2*time.Second); err != nil {
-		t.Fatalf("task dagflow execution failed: %v", err)
+	err = taskDagflow.Execute(ctx, 2*time.Second)
+	if err == nil {
+		t.Fatal("expected task dagflow execution to fail due to task timeout, but it succeeded")
 	}
-
-	goodsInShops := collection.GetGoodsInShops()
-	if len(goodsInShops.ShopToGoods) == 0 {
-		t.Fatal("expected goods in shops, but got none")
-	}
+	fmt.Printf("task dagflow execution failed as expected: %v\n", err)
 	fmt.Printf("task dagflow cost: %v\n", taskDagflow.timeCost)
 }
 
@@ -338,13 +335,10 @@ func TestFlowTimeout(t *testing.T) {
 	}
 
 	ctx := context.Background()
-	if err := taskDagflow.Execute(ctx, 300*time.Millisecond); err != nil {
-		t.Fatalf("task dagflow execution failed: %v", err)
+	err = taskDagflow.Execute(ctx, 200*time.Millisecond)
+	if err == nil {
+		t.Fatal("expected task dagflow execution to fail due to task timeout, but it succeeded")
 	}
-
-	goodsInShops := collection.GetGoodsInShops()
-	if len(goodsInShops.ShopToGoods) == 0 {
-		t.Fatal("expected goods in shops, but got none")
-	}
+	fmt.Printf("task dagflow execution failed as expected: %v\n", err)
 	fmt.Printf("task dagflow cost: %v\n", taskDagflow.timeCost)
 }

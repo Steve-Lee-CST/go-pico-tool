@@ -32,7 +32,7 @@ func TestHttpDecoder_DefaultConfig(t *testing.T) {
 	err := json.Unmarshal(w.Body.Bytes(), &response)
 	assert.NoError(t, err)
 
-	// 验证响应包含HTTP请求信息
+	// Verify response contains HTTP request information
 	assert.Contains(t, response, "method")
 	assert.Contains(t, response, "path")
 	assert.Contains(t, response, "headers")
@@ -96,9 +96,9 @@ func TestHttpDecoder_Middleware_FormData(t *testing.T) {
 		assert.NotNil(t, req, "HTTP request should be decoded")
 		assert.Equal(t, "POST", req.Method)
 		assert.Contains(t, req.ContentType, "application/x-www-form-urlencoded")
-		// 验证原始请求体被捕获
+		// Verify that raw request body is captured
 		assert.NotEmpty(t, req.RawBody, "Raw body should be captured")
-		// 由于表单解析可能受到GetRawData的影响，我们主要验证原始数据被捕获
+		// Since form parsing may be affected by GetRawData, we mainly verify that raw data is captured
 		assert.Contains(t, string(req.RawBody), "name=test")
 		assert.Contains(t, string(req.RawBody), "value=123")
 		c.JSON(http.StatusOK, gin.H{"message": "success"})
@@ -171,7 +171,7 @@ func TestHttpDecoder_ResponseCapture(t *testing.T) {
 
 	assert.Equal(t, http.StatusCreated, w.Code)
 
-	// 验证响应被正确捕获
+	// Verify that response is correctly captured
 	var response map[string]interface{}
 	err := json.Unmarshal(w.Body.Bytes(), &response)
 	assert.NoError(t, err)
@@ -183,29 +183,29 @@ func TestHttpDecoder_HelperFunctions(t *testing.T) {
 	r := gin.New()
 	cfg := DefaultConfig()
 
-	// 测试设置和获取HTTP请求
+	// Test setting and getting HTTP requests
 	r.GET("/helper", func(c *gin.Context) {
-		// 测试设置HTTP请求
+		// Test setting HTTP request
 		testReq := &HttpRequest{
 			Method: "GET",
 			IP:     "127.0.0.1",
 		}
 		Helper.SetHttpRequest(c, cfg, testReq)
 
-		// 测试获取HTTP请求
+		// Test getting HTTP request
 		retrievedReq := Helper.GetHttpRequest(c, cfg)
 		assert.NotNil(t, retrievedReq)
 		assert.Equal(t, "GET", retrievedReq.Method)
 		assert.Equal(t, "127.0.0.1", retrievedReq.IP)
 
-		// 测试设置HTTP响应
+		// Test setting HTTP response
 		testResp := &HttpResponse{
 			Status: 200,
 			Size:   100,
 		}
 		Helper.SetHttpResponse(c, cfg, testResp)
 
-		// 测试获取HTTP响应
+		// Test getting HTTP response
 		retrievedResp := Helper.GetHttpResponse(c, cfg)
 		assert.NotNil(t, retrievedResp)
 		assert.Equal(t, 200, retrievedResp.Status)
@@ -259,7 +259,7 @@ func TestHttpDecoder_DecodeResponse(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, w.Code)
 
-	// 验证响应体被正确解析
+	// Verify that response body is correctly parsed
 	var response map[string]interface{}
 	err := json.Unmarshal(w.Body.Bytes(), &response)
 	assert.NoError(t, err)
@@ -273,7 +273,7 @@ func TestHttpDecoder_ErrorHandling(t *testing.T) {
 	r.Use(decoder.Middleware())
 
 	r.GET("/error", func(c *gin.Context) {
-		// 模拟错误情况
+		// Simulate error condition
 		c.JSON(http.StatusBadRequest, gin.H{"error": "bad request"})
 	})
 
@@ -310,7 +310,7 @@ func TestHttpDecoder_Handler_NoRequest(t *testing.T) {
 	r := gin.New()
 	decoder := NewHttpDecoder(DefaultConfig())
 
-	// 不使用中间件，直接测试Handler
+	// Test Handler directly without using middleware
 	r.GET("/no-request", decoder.Handler())
 
 	w := httptest.NewRecorder()
@@ -326,21 +326,21 @@ func TestHttpDecoder_Handler_NoRequest(t *testing.T) {
 }
 
 func TestWrappedResponseWriter(t *testing.T) {
-	// 测试包装的响应写入器
+	// Test wrapped response writer
 	gin.SetMode(gin.TestMode)
 	r := gin.New()
 
 	r.GET("/test-writer", func(c *gin.Context) {
 		writer := NewWrappedResponseWriter(c.Writer)
 
-		// 写入数据
+		// Write data
 		testData := []byte("test response")
 		n, err := writer.Write(testData)
 
 		assert.NoError(t, err)
 		assert.Equal(t, len(testData), n)
 
-		// 验证数据被正确捕获
+		// Verify data is correctly captured
 		bodyBytes := writer.GetBodyBytes()
 		assert.Equal(t, testData, bodyBytes)
 	})
@@ -363,9 +363,9 @@ func TestHttpDecoder_Middleware_MultipartFormData(t *testing.T) {
 		assert.NotNil(t, req, "HTTP request should be decoded")
 		assert.Equal(t, "POST", req.Method)
 		assert.Contains(t, req.ContentType, "multipart/form-data")
-		// 验证原始请求体被捕获
+		// Verify that raw request body is captured
 		assert.NotEmpty(t, req.RawBody, "Raw body should be captured")
-		// 验证表单值被解析（如果可能的话）
+		// Verify that form values are parsed (if possible)
 		if len(req.FormValues) > 0 {
 			assert.Equal(t, "test", req.FormValues.Get("name"))
 		}
@@ -376,7 +376,7 @@ func TestHttpDecoder_Middleware_MultipartFormData(t *testing.T) {
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
 
-	// 添加表单字段
+	// Add form field
 	field, err := writer.CreateFormField("name")
 	assert.NoError(t, err)
 	field.Write([]byte("test"))
