@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"reflect"
+	"strings"
 	"time"
 )
 
@@ -39,7 +40,7 @@ type ITask[CT ICollection] interface {
 	InputTypes() []reflect.Type
 	OutputType() reflect.Type
 	Timeout() time.Duration
-	Execute(ctx context.Context, collection *CT) error
+	Execute(ctx context.Context, collection CT) error
 }
 
 type TaskCreateFunc[CT ICollection] func() (ITask[CT], error)
@@ -53,4 +54,27 @@ func CreateTask[CT ICollection](createFunc TaskCreateFunc[CT]) (ITask[CT], error
 		return nil, fmt.Errorf("task created with %T returned nil", createFunc)
 	}
 	return task, nil
+}
+
+func AutoInputTypes[CT ICollection]() []reflect.Type {
+	cElem := reflect.TypeOf((*CT)(nil)).Elem()
+	var inputTypes []reflect.Type
+	for i := 0; i < cElem.NumMethod(); i++ {
+		method := cElem.Method(i)
+		if strings.HasPrefix(method.Name, "Get") {
+			inputTypes = append(inputTypes, method.Type.Out(0))
+		}
+	}
+	return inputTypes
+}
+
+func AutoOutputType[CT ICollection]() reflect.Type {
+	cElem := reflect.TypeOf((*CT)(nil)).Elem()
+	for i := 0; i < cElem.NumMethod(); i++ {
+		method := cElem.Method(i)
+		if strings.HasPrefix(method.Name, "Set") && method.Type.NumIn() == 1 {
+			return method.Type.In(0) // The first input is the collection itself
+		}
+	}
+	return nil
 }

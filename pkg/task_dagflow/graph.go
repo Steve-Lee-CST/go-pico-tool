@@ -96,7 +96,7 @@ func (g *graph[CT]) calReachStatus(
 	for newNodeTag {
 		newNodeTag = false
 		for output, node := range g.outputToNode {
-			if node.Meta.InputTypes.IsSubset(reachableTypes) {
+			if node.Meta.InputTypes.IsSubset(reachableTypes) && !reachableTypes.Contains(output) {
 				reachableTypes.Add(output)
 				node.Reachable = true
 				newNodeTag = true
@@ -107,12 +107,8 @@ func (g *graph[CT]) calReachStatus(
 	return
 }
 
-func (g *graph[CT]) GetMinTaskMetas(collection *CT) ([]*taskMeta[CT], error) {
-	if collection == nil {
-		return nil, errors.New("collection cannot be nil")
-	}
-
-	collectionMeta, err := newCollectionMeta(*collection)
+func (g *graph[CT]) GetMinTaskMetas(collection CT) ([]*taskMeta[CT], error) {
+	collectionMeta, err := newCollectionMeta(collection)
 	if err != nil {
 		return nil, err
 	}

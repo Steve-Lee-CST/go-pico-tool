@@ -12,7 +12,7 @@ import (
 )
 
 type TaskDagflow[CT ICollection] struct {
-	collection     *CT
+	collection     CT
 	collectionMeta *collectionMeta[CT]
 
 	metas        []*taskMeta[CT]
@@ -23,11 +23,8 @@ type TaskDagflow[CT ICollection] struct {
 	lock sync.Mutex
 }
 
-func NewTaskDagflow[CT ICollection](metas []*taskMeta[CT], collection *CT) (*TaskDagflow[CT], error) {
-	if collection == nil {
-		return nil, errors.New("collection cannot be nil")
-	}
-	collectionMeta, err := newCollectionMeta(*collection)
+func NewTaskDagflow[CT ICollection](metas []*taskMeta[CT], collection CT) (*TaskDagflow[CT], error) {
+	collectionMeta, err := newCollectionMeta(collection)
 	if err != nil {
 		return nil, err
 	}

@@ -44,7 +44,7 @@ func (te *taskExecutor[CT]) RemoveAndCheckBlock(block reflect.Type) bool {
 }
 
 func (te *taskExecutor[CT]) Execute(
-	ctx context.Context, collection *CT, resultChan chan *taskResult[CT],
+	ctx context.Context, collection CT, resultChan chan *taskResult[CT],
 ) {
 	startTime := time.Now()
 	result := te.executeWithTimeout(ctx, collection, te.Meta.Timeout)
@@ -53,7 +53,7 @@ func (te *taskExecutor[CT]) Execute(
 }
 
 func (te *taskExecutor[CT]) executeWithTimeout(
-	ctx context.Context, collection *CT, timeout time.Duration,
+	ctx context.Context, collection CT, timeout time.Duration,
 ) *taskResult[CT] {
 	resultChan := make(chan *taskResult[CT], 1)
 	go func() {

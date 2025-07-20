@@ -39,11 +39,7 @@ func (f *Factory[CT]) CreateGraph() {
 	}
 }
 
-func (f *Factory[CT]) CreateTaskDagflow(collection *CT) (*TaskDagflow[CT], error) {
-	if collection == nil {
-		return nil, fmt.Errorf("collection cannot be nil")
-	}
-
+func (f *Factory[CT]) CreateTaskDagflow(collection CT) (*TaskDagflow[CT], error) {
 	metas, err := f.graph.GetMinTaskMetas(collection)
 	if err != nil {
 		return nil, err
