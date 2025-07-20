@@ -56,7 +56,9 @@ func (g *graph[CT]) getInputs(outputType reflect.Type) mapset.Set[reflect.Type] 
 	inputList := tools.NewQueue[reflect.Type]()
 	inputs := node.Meta.InputTypes.Clone()
 	for inputType := range inputs.Iter() {
-		inputList.Enqueue(inputType)
+		if inputType != nil {
+			inputList.Enqueue(inputType)
+		}
 	}
 	for inputList.Size() > 0 {
 		inputType, exist := inputList.Dequeue()
