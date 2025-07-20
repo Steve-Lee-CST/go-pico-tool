@@ -48,12 +48,13 @@ func newGraph[CT ICollection](metas []*taskMeta[CT]) *graph[CT] {
 
 // 并查集查找 outputType 的所有输入类型
 func (g *graph[CT]) getInputs(outputType reflect.Type) mapset.Set[reflect.Type] {
-	inputs, exists := g.outputToInputs[outputType]
+	node, exists := g.outputToNode[outputType]
 	if !exists {
 		return nil
 	}
 
 	inputList := tools.NewQueue[reflect.Type]()
+	inputs := node.Meta.InputTypes.Clone()
 	for inputType := range inputs.Iter() {
 		inputList.Enqueue(inputType)
 	}
@@ -65,7 +66,7 @@ func (g *graph[CT]) getInputs(outputType reflect.Type) mapset.Set[reflect.Type] 
 		// find in graph
 		if meta, ok := g.outputToNode[inputType]; ok {
 			for childInputType := range meta.Meta.InputTypes.Iter() {
-				if !inputs.Contains(childInputType) {
+				if childInputType != nil && !inputs.Contains(childInputType) {
 					inputs.Add(childInputType)
 					inputList.Enqueue(childInputType)
 				}

@@ -1,7 +1,6 @@
 package tools
 
 import (
-	"container/list"
 	"sync"
 )
 
@@ -19,45 +18,45 @@ type Queue[T any] interface {
 	Clear()
 }
 
-type queue[T any] list.List
+type queue[T any] []T
 
 func NewQueue[T any]() Queue[T] {
-	return &queue[T]{}
+	q := make(queue[T], 0)
+	return &q
 }
 
 func (q *queue[T]) Enqueue(item T) {
-	(*list.List)(q).PushBack(item)
+	*q = append(*q, item)
 }
 
 func (q *queue[T]) Dequeue() (T, bool) {
-	if (*list.List)(q).Len() == 0 {
+	if len(*q) == 0 {
 		var zero T
 		return zero, false
 	}
-	elem := (*list.List)(q).Front()
-	(*list.List)(q).Remove(elem)
-	return elem.Value.(T), true
+	elem := (*q)[0]
+	*q = (*q)[1:]
+	return elem, true
 }
 
 func (q *queue[T]) Peek() (T, bool) {
-	if (*list.List)(q).Len() == 0 {
+	if len(*q) == 0 {
 		var zero T
 		return zero, false
 	}
-	front := (*list.List)(q).Front()
-	return front.Value.(T), true
+	return (*q)[0], true
 }
 
 func (q *queue[T]) IsEmpty() bool {
-	return (*list.List)(q).Len() == 0
+	return len(*q) == 0
 }
 
 func (q *queue[T]) Size() int {
-	return (*list.List)(q).Len()
+	return len(*q)
 }
 
 func (q *queue[T]) Clear() {
-	(*list.List)(q).Init()
+	*q = (*q)[:0]
 }
 
 type concurrentQueue[T any] struct {
