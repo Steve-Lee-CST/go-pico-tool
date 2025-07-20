@@ -12,7 +12,7 @@ type packedResult[T any] struct {
 }
 
 func RunWithTimeout[T any](
-	ctx context.Context, fn func(context.Context) (T, error), timeout time.Duration,
+	ctx context.Context, timeout time.Duration, fn func(context.Context) (T, error),
 ) (T, error) {
 	if ctx == nil {
 		ctx = context.Background()
