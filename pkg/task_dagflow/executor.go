@@ -6,7 +6,7 @@ import (
 	"reflect"
 	"time"
 
-	tools "github.com/ysugimoto/go-pico-tool/pkg/tools"
+	tools "github.com/Steve-Lee-CST/go-pico-tool/tools"
 
 	mapset "github.com/deckarep/golang-set/v2"
 )
@@ -49,7 +49,7 @@ func (te *taskExecutor[CT]) Execute(
 	ctx context.Context, collection CT, resultChan chan *taskResult[CT],
 ) {
 	startTime := time.Now()
-	_, err := tools.RunFuncWithTimeout[taskResult[CT]](
+	_, err := tools.RunFuncWithTimeout(
 		ctx, te.Meta.Timeout,
 		func(subCtx context.Context) (interface{}, error) {
 			return struct{}{}, te.Task.Execute(ctx, collection)
