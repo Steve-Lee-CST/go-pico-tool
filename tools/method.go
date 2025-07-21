@@ -11,7 +11,7 @@ type packedResult[T any] struct {
 	Err    error
 }
 
-func RunWithTimeout[T any](
+func RunFuncWithTimeout[T any](
 	ctx context.Context, timeout time.Duration, fn func(context.Context) (T, error),
 ) (T, error) {
 	if ctx == nil {

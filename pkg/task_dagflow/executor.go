@@ -6,6 +6,8 @@ import (
 	"reflect"
 	"time"
 
+	tools "github.com/ysugimoto/go-pico-tool/pkg/tools"
+
 	mapset "github.com/deckarep/golang-set/v2"
 )
 
@@ -47,48 +49,15 @@ func (te *taskExecutor[CT]) Execute(
 	ctx context.Context, collection CT, resultChan chan *taskResult[CT],
 ) {
 	startTime := time.Now()
-	result := te.executeWithTimeout(ctx, collection, te.Meta.Timeout)
-	result.TimeCost = time.Since(startTime)
-	resultChan <- result
-}
-
-func (te *taskExecutor[CT]) executeWithTimeout(
-	ctx context.Context, collection CT, timeout time.Duration,
-) *taskResult[CT] {
-	resultChan := make(chan *taskResult[CT], 1)
-	go func() {
-		defer func() {
-			if r := recover(); r != nil {
-				resultChan <- &taskResult[CT]{
-					Meta: te.Meta,
-					Err:  fmt.Errorf("task %s panicked: %v", te.Meta.Name, r),
-				}
-			}
-		}()
-		if err := te.Task.Execute(ctx, collection); err != nil {
-			resultChan <- &taskResult[CT]{
-				Meta: te.Meta,
-				Err:  fmt.Errorf("task %s failed: %w", te.Meta.Name, err),
-			}
-			return
-		}
-		resultChan <- &taskResult[CT]{
-			Meta: te.Meta,
-			Err:  nil,
-		}
-	}()
-	select {
-	case <-ctx.Done():
-		return &taskResult[CT]{
-			Meta: te.Meta,
-			Err:  fmt.Errorf("task %s cancelled: %w", te.Meta.Name, ctx.Err()),
-		}
-	case <-time.After(timeout):
-		return &taskResult[CT]{
-			Meta: te.Meta,
-			Err:  fmt.Errorf("task %s timed out after %s", te.Meta.Name, timeout),
-		}
-	case result := <-resultChan:
-		return result
+	_, err := tools.RunFuncWithTimeout[taskResult[CT]](
+		ctx, te.Meta.Timeout,
+		func(subCtx context.Context) (interface{}, error) {
+			return struct{}{}, te.Task.Execute(ctx, collection)
+		},
+	)
+	resultChan <- &taskResult[CT]{
+		Meta:     te.Meta,
+		Err:      err,
+		TimeCost: time.Since(startTime),
 	}
 }
